@@ -2,23 +2,6 @@
 
 ```yaml
 # deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  replicas: 3 # Specifies the number of pod replicas
-  selector:
-    matchLabels:
-      app: nginx-app
-  template:
-    metadata:
-      labels:
-        app: nginx-app
-    spec:
-      containers:
-      - name: nginx-container
-        image: nginx:1.27.4
 ```
 
 # kubectl apply

@@ -15,52 +15,10 @@
 
 ```yaml
 # service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql-headless-service
-spec:
-  clusterIP: None  # Mean headless service
-  selector:
-    app: mysql-app
-  ports:
-    - port: 3306
 ```
 
 ```yaml
 # statefulset.yaml
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: mysql
-spec:
-  serviceName: mysql-headless-service
-  replicas: 3
-  selector:
-    matchLabels:
-      app: mysql-app
-  template:
-    metadata:
-      labels:
-        app: mysql-app
-    spec:
-      containers:
-        - name: mysql-container
-          image: mysql:9.2.0
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: "yourpassword"
-          volumeMounts:
-            - name: mysql-storage
-              mountPath: /var/lib/mysql
-  volumeClaimTemplates:
-    - metadata:
-        name: mysql-storage
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 1Gi
 ```
 
 # What Happends

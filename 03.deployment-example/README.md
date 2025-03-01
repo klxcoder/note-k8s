@@ -2,22 +2,6 @@
 
 ```yaml
 # deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment # Sets the name of the Deployment to nginx-deployment
-spec:
-  selector: # The selector tells Kubernetes which Pods belong to this Deployment.
-    matchLabels:
-      app: nginx-app # It selects Pods that have the label app: nginx-app
-  template: # Defining the Pod Template, This is the Pod template, which defines what each Pod should look like
-    metadata:
-      labels: # The labels here must match the selector.matchLabels above
-        app: nginx-app
-    spec:
-      containers: # Defines a container inside the Pod
-      - name: nginx-container # The container's name
-        image: nginx:1.27.4 # Uses the official nginx image from Docker Hub
 ```
 
 # kubectl apply
