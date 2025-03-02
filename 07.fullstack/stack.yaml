@@ -1,0 +1,204 @@
+# MySQL: PersistentVolume, PVC, Deployment, and Service
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /tmp/mysql-data   # adjust this path as needed
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  volumeName: mysql-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:9.2.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "rootpassword"
+        - name: MYSQL_DATABASE
+          value: "mydatabase"
+        - name: MYSQL_USER
+          value: "user"
+        - name: MYSQL_PASSWORD
+          value: "password"
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP
+---
+# Express.js Backend: Deployment and Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: express-backend
+  template:
+    metadata:
+      labels:
+        app: express-backend
+    spec:
+      containers:
+      - name: express-backend
+        image: express-backend:latest  # Build this image locally
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_HOST
+          value: "mysql"
+        - name: DB_USER
+          value: "user"
+        - name: DB_PASSWORD
+          value: "password"
+        - name: DB_NAME
+          value: "mydatabase"
+        volumeMounts:
+        - name: express-code
+          mountPath: /code   # adjust according to your Dockerfile
+      volumes:
+      - name: express-code
+        hostPath:
+          path: ./backend/src  # update this path to your local code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: express-backend
+spec:
+  selector:
+    app: express-backend
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+---
+# Vite.js Development: Deployment and Service (for hot reload)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vite-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vite-dev
+  template:
+    metadata:
+      labels:
+        app: vite-dev
+    spec:
+      containers:
+      - name: vite-dev
+        image: vite-dev:latest  # Build this image locally for Vite
+        imagePullPolicy: IfNotPresent
+        command: ["npm", "run", "dev"]
+        ports:
+        - containerPort: 5173   # adjust if your Vite dev server uses a different port
+        volumeMounts:
+        - name: vite-code
+          mountPath: /code   # adjust according to your Dockerfile/workdir
+      volumes:
+      - name: vite-code
+        hostPath:
+          path: ./frontend/vite  # update this to your local Vite source directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vite-dev
+spec:
+  selector:
+    app: vite-dev
+  ports:
+  - port: 5173
+    targetPort: 5173
+  type: ClusterIP
+---
+# Nginx: Deployment and Service for serving Vite static build
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-static
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-static
+  template:
+    metadata:
+      labels:
+        app: nginx-static
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: static-content
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: static-content
+        hostPath:
+          path: /path/to/your/vite/build  # update this to your local Vite build folder
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-static
+spec:
+  selector:
+    app: nginx-static
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
