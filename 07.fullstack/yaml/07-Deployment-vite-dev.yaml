@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vite-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vite-dev
+  template:
+    metadata:
+      labels:
+        app: vite-dev
+    spec:
+      containers:
+      - name: vite-dev
+        image: vite-dev:latest  # Build this image locally for Vite
+        imagePullPolicy: Never
+        command: ["npm", "run", "dev"]
+        ports:
+        - containerPort: 5173   # adjust if your Vite dev server uses a different port
+        volumeMounts:
+        - name: vite-code
+          mountPath: /code/vite
+          subPath: vite  # Mount only the `vite` folder
+        - name: vite-code
+          mountPath: /code/package.json
+          subPath: package.json  # Mount package.json separately
+        - name: vite-code
+          mountPath: /code/package-lock.json
+          subPath: package-lock.json  # Mount package-lock.json separately
+
+      volumes:
+      - name: vite-code
+        hostPath:
+          # Update this path to your local code
+          # Important: Use absolute path
+          path: /mnt/frontend

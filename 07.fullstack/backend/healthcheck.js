@@ -3,7 +3,7 @@ const http = require("http");
 const options = {
   timeout: 2000,
   host: "localhost",
-  port: process.env.PORT || 8080,
+  port: process.env.PORT || 3000,
   path: "/healthz" // must be the same as HEALTHCHECK in Dockerfile
 };
 
@@ -13,7 +13,7 @@ const request = http.request(options, res => {
   process.exit();
 });
 
-request.on("error", function(err) {
+request.on("error", function (err) {
   console.error("ERROR", err);
   process.exit(1);
 });

@@ -18,4 +18,4 @@ HEALTHCHECK --interval=30s \
 # copy in our source code last, as it changes the most
 COPY . .
 
-CMD [ "node", "src/index.js" ]
+CMD ["node", "src/index.js"]

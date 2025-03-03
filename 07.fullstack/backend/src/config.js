@@ -13,5 +13,5 @@ module.exports = {
       ? readFileSync(process.env.DATABASE_PASSWORD)
       : null
   },
-  port: process.env.PORT || 8080
+  port: process.env.PORT || 3000
 };

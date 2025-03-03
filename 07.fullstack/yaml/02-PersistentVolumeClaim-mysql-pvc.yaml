@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  volumeName: mysql-pv # Explicitly binding
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "" # Must match PV to avoid dynamic provisioning
+  resources:
+    requests:
+      storage: 1Gi

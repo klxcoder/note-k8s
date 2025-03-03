@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: express-backend
+  template:
+    metadata:
+      labels:
+        app: express-backend
+    spec:
+      containers:
+      - name: express-backend
+        image: express-backend:latest  # Build this image locally
+        imagePullPolicy: Never
+        command: ["npm", "run", "start-watch"]
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_HOST
+          value: "mysql"
+        - name: DB_USER
+          value: "user"
+        - name: DB_PASSWORD
+          value: "password"
+        - name: DB_NAME
+          value: "mydatabase"
+        volumeMounts:
+        - name: express-code
+          mountPath: /code/src
+          subPath: src  # Mount only the `src` folder
+        - name: express-code
+          mountPath: /code/package.json
+          subPath: package.json  # Mount package.json separately
+        - name: express-code
+          mountPath: /code/package-lock.json
+          subPath: package-lock.json  # Mount package-lock.json separately
+
+      volumes:
+      - name: express-code
+        hostPath:
+          # Update this path to your local code
+          # Important: Use absolute path
+          path: /mnt/backend
